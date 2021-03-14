@@ -28,7 +28,19 @@ namespace IIG.PasswordHashingUtils
         public static void Init(string salt, uint adlerMod32)
         {
             if (!string.IsNullOrEmpty(salt))
+            {
+                try
+                {
+                    salt.Select(Convert.ToByte).ToArray();
+                }
+                catch (OverflowException)
+                {
+                    salt = Encoding.ASCII.GetString(Encoding.Unicode.GetBytes(salt));
+                }
+
                 _salt = salt;
+            }
+
             if (adlerMod32 > 0)
                 _modAdler32 = adlerMod32;
         }
@@ -43,6 +55,8 @@ namespace IIG.PasswordHashingUtils
         public static string GetHash(string password, string salt = null, uint? adlerMod32 = null)
         {
             Init(salt, adlerMod32 ?? 0);
+            if (password == null)
+                return null;
             try
             {
                 password.Select(Convert.ToByte).ToArray();
